@@ -1,1 +1,1 @@
-{"name":"sara-ai-tiktok-live","version":"0.2.0","private":true,"scripts":{"start":"node server.js","check":"node --check server.js","test":"node --test"},"engines":{"node":">=20"},"dependencies":{}}
+{"name":"sara-ai-tiktok-live","version":"0.3.0","private":true,"scripts":{"start":"node server.js","start:runtime":"node runtime.js","check":"node --check server.js && node --check runtime.js","test":"node --test"},"engines":{"node":">=20"},"dependencies":{}}
