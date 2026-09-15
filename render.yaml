@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: sara-live
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.6-luna
+      - key: VOICE_PROVIDER
+        value: elevenlabs
+      - key: VOICE_API_KEY
+        sync: false
+      - key: VOICE_ID
+        sync: false
+      - key: TIKTOK_CLIENT_KEY
+        sync: false
+      - key: TIKTOK_CLIENT_SECRET
+        sync: false
+      - key: TIKTOK_REDIRECT_URI
+        sync: false
+      - key: TIKTOK_SCOPES
+        value: user.info.basic,video.publish
+      - key: SARA_MAX_QUEUE
+        value: "20"
+      - key: SARA_AUDIO_TTL_MS
+        value: "600000"
+      - key: SARA_MESSAGE_COOLDOWN_MS
+        value: "1200"
