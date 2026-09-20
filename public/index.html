@@ -34,7 +34,9 @@
 </div>
 <script>
 const $=id=>document.getElementById(id);
-const api=(p,o={})=>fetch(p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
+// GitHub Pages is static. Set the public Node backend URL via ?backend=https://YOUR-BACKEND.
+const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||'';
+const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
 let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;
 
 function setStatus(text,good=false){$('status').textContent=text;$('dot').classList.toggle('onDot',good)}
@@ -123,7 +125,11 @@ async function checkHealth(){
 async function checkTikTok(){
   try{const x=await(await api('/api/me')).json();if(x.authenticated){$('connect').textContent='TikTok Connected';$('connect').disabled=true}}catch{}
 }
-$('connect').onclick=()=>location.href='/auth/tiktok';
+$('connect').onclick=()=>{
+  if(!BACKEND_URL){showCaption('Backend URL required: ?backend=https://YOUR-BACKEND');return;}
+  localStorage.setItem('sara_backend_url',BACKEND_URL);
+  location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';
+};
 (async()=>{
   const h=await checkHealth();await checkTikTok();
   if(h?.liveAvatarConfigured)await startAvatar();
