@@ -76,7 +76,7 @@ async function talk(text){
     if(!r.ok)throw Error(x.error||'SARA response failed');
     showCaption(x.reply||'');
     setStatus('SARA بول رہی ہے…',true);
-    if(typeof avatar.repeat==='function')await avatar.repeat(x.reply||'');
+    if(x.audioBase64&&typeof avatar.repeatAudio==='function'){avatar.repeatAudio(x.audioBase64)}else if(typeof avatar.repeat==='function'){await avatar.repeat(x.reply||'')}
   }catch(e){showCaption('معذرت، ابھی جواب دینے میں مسئلہ آ رہا ہے۔');mic('SARA backend error: '+e.message)}
   finally{busy=false;setStatus('SARA LIVE',true);mic('🎤 SARA سن رہی ہے — آپ بات کریں۔');setTimeout(startRecognition,700)}
 }
@@ -86,8 +86,9 @@ async function startAvatar(){
     const r=await api('/api/liveavatar/token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({isSandbox:false})});
     const x=await r.json();
     if(!r.ok)throw Error(x.error||'LiveAvatar connection failed');
+    if(!x.session_token)throw Error('LiveAvatar نے session token نہیں دیا۔');
     SDK=await import('https://esm.sh/@heygen/liveavatar-web-sdk@0.0.19');
-    avatar=new SDK.LiveAvatarSession(x.session_token,{autoKeepAlive:true,voiceChat:{defaultMuted:true}});
+    avatar=new SDK.LiveAvatarSession(x.session_token,{autoKeepAlive:true});
     avatar.on(SDK.SessionEvent.SESSION_STREAM_READY,async()=>{
       $('avatar').srcObject=null;
       avatar.attach($('avatar'));
