@@ -9,46 +9,164 @@
 </head>
 <body>
 <div class="app">
+<main class="stage" id="stage">
+  <div class="label">SARA • <span id="saraState">Connecting…</span></div>
+  <video id="avatarVideo" class="avatarVideo" autoplay playsinline></video>
+  <div class="caption" id="caption">السلام علیکم جی۔ میں SARA ہوں۔</div>
+  <div id="micStatus" class="notice" style="position:absolute;top:62px;left:18px;right:18px;z-index:4;text-align:center">SARA خود سننے کے لیے تیار ہو رہی ہے…</div>
+</main>
 <aside class="panel">
-<div class="brand">SARA AI LIVE</div><div class="muted">AI virtual host • Urdu conversation + real avatar</div>
-<div class="status"><span id="dot" class="dot"></span><span id="status">Starting…</span></div>
-<button class="btn primary" id="connect">Connect TikTok</button>
-<div class="box"><h3>TikTok account</h3><div id="account" class="small muted">Not connected</div><button class="btn" id="creator">Check creator permissions</button></div>
-<div class="box"><h3>SARA voice</h3><div class="voice"><button id="speak">🔊 Test voice</button><span class="muted" id="voiceStatus">Checking…</span></div></div>
-<div class="box"><h3>Real avatar</h3><div class="muted small">Secure LiveAvatar connection. The API key stays on the backend; the browser receives only a short-lived session token.</div><button class="btn primary" id="avatarStart">Start / Reconnect SARA Avatar</button><button class="btn" id="avatarStop" disabled>Stop avatar</button><button class="btn" id="listen">🎤 Start Listening</button><div id="avatarStatus" class="small muted">Not connected</div><div id="listenStatus" class="small muted">Microphone off</div></div>
-<div class="notice"><b>AI disclosure:</b> SARA is an AI virtual host. This system does not fake TikTok viewers, likes, gifts, battles, comments or LIVE state.</div>
+  <div class="brand">SARA AI LIVE</div>
+  <div class="muted">Real female AI host • صرف اردو</div>
+  <div class="status"><span id="dot" class="dot"></span><span id="status">Connecting…</span></div>
+  <button class="btn primary" id="connect">Connect TikTok</button>
+  <div id="account" class="small muted">TikTok ابھی connected نہیں ہے۔</div>
+  <div class="box">
+    <h3>SARA</h3>
+    <div class="transcript" id="transcript"><div class="msg sara">السلام علیکم جی۔ میں SARA ہوں۔ آپ مجھ سے اردو میں بات کریں، میں خود سنوں گی اور جواب دوں گی۔ 💜</div></div>
+    <div class="queue"><span id="queueText">Listening…</span><span id="pipeline">Idle</span></div>
+  </div>
+  <div class="notice"><b>Voice:</b> مائیک کی اجازت ایک بار دیں۔ اس کے بعد SARA مسلسل سننے کی کوشش کرے گی اور آپ کے سوال کا جواب خود دے گی۔</div>
 </aside>
-<main class="stage" id="stage"><div class="label">SARA • <span id="saraState">Idle</span></div><video id="avatarVideo" class="avatarVideo" autoplay playsinline></video><div class="caption" id="caption">السلام علیکم جی! سارا یہاں ہے۔ صرف اردو میں بات کریں۔ 💜</div></main>
-<aside class="panel">
-<div class="box"><h3>Conversation</h3><div class="transcript" id="transcript"><div class="msg sara">السلام علیکم جی! میں SARA ہوں، ایک AI virtual host۔ صرف اردو میں بات کرتی ہوں۔ 💜</div></div><div class="queue"><span id="queueText">Queue: 0</span><span id="pipeline">Idle</span></div><input class="input" id="input" placeholder="SARA se baat karein…"><button class="btn primary" id="send">Send to SARA</button></div>
-<div class="box"><h3>LIVE control</h3><div class="muted small">Real-time event stream and emergency control.</div><div class="row"><button class="btn primary" id="resume">Resume SARA</button><button class="btn" id="stop">Emergency STOP</button></div><div id="liveFeed" class="small muted">Event stream: connecting…</div></div><div class="box"><h3>Connection diagnostics</h3><button class="btn" id="diagnose">Run connection test</button><div id="diag" class="small muted diag"></div></div>
-<div class="box"><h3>Direct Post API</h3><div class="muted small">Official TikTok Content Posting API. This is separate from LIVE interaction.</div><input class="input" id="videoUrl" placeholder="Public HTTPS video URL (.mp4)"><input class="input" id="title" placeholder="Caption / title"><div class="row"><button class="btn" id="post">Publish</button><button class="btn" id="statusBtn">Status</button></div><div id="postResult" class="small muted">No publish request yet.</div></div>
-<div class="notice">LIVE comments/gifts are not invented here. An approved official TikTok LIVE event source can later feed the same <b>/api/sara/message</b> pipeline.</div>
-</aside></div>
+</div>
 <script>
 const $=id=>document.getElementById(id);
-const apiBase=()=>location.origin;
 const api=(p,o={})=>fetch(p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
-let lang='ur',voiceReady=false,publishId=null,avatar=null,avatarSdk=null,eventSource=null,recognition=null,listening=false;
-const greetings={ur:'السلام علیکم جی! سارا یہاں ہے۔ صرف اردو میں بات کریں۔ 💜'};
-function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('transcript').appendChild(d);$('transcript').scrollTop=$('transcript').scrollHeight}
-function state(s){$('saraState').textContent=s;$('pipeline').textContent=s;$('stage').classList.toggle('speaking',s==='Speaking')}
-async function playAudio(url){if(!url)return false;try{state('Speaking');const a=new Audio(url);await a.play();await new Promise(r=>{a.onended=r;a.onerror=r});state('Idle');return true}catch{return false}}
-async function speak(text){if(avatar&&typeof avatar.repeat==='function'){try{state('Speaking');await avatar.repeat(text);return true}catch(e){$('avatarStatus').textContent='Avatar speech failed: '+e.message}}if(voiceReady){try{const r=await api('/api/voice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:'ur'})});if(r.ok){await playAudio(URL.createObjectURL(await r.blob()));return true}}catch{}}if('speechSynthesis'in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ur-PK';u.rate=.92;state('Speaking');u.onend=()=>state('Idle');speechSynthesis.speak(u);return true}state('Idle');return false}
-function cleanupAvatar(){const a=avatar;avatar=null;$('avatarStop').disabled=true;$('stage').classList.remove('liveAvatar');state('Idle');if(a){try{a.stop()}catch{}}}
-async function startAvatar(){try{if(avatar)return;$('avatarStatus').textContent='Connecting SARA…';const r=await api('/api/liveavatar/token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({isSandbox:true})});const x=await r.json().catch(()=>({}));if(!r.ok)throw Error(x.error||'Backend could not create LiveAvatar session');avatarSdk=await import('https://esm.sh/@heygen/liveavatar-web-sdk@0.0.19');avatar=new avatarSdk.LiveAvatarSession(x.session_token,{autoKeepAlive:true,voiceChat:{defaultMuted:true}});avatar.on(avatarSdk.SessionEvent.SESSION_STREAM_READY,async()=>{const v=$('avatarVideo');avatar.attach(v);await v.play().catch(()=>{});$('stage').classList.add('liveAvatar');$('avatarStatus').textContent='SARA کا حقیقی AI avatar LIVE ہے';state('Idle');$('avatarStop').disabled=false});avatar.on(avatarSdk.AgentEventsEnum.AVATAR_SPEAK_STARTED,()=>state('Speaking'));avatar.on(avatarSdk.AgentEventsEnum.AVATAR_SPEAK_ENDED,()=>state('Idle'));avatar.on(avatarSdk.SessionEvent.SESSION_DISCONNECTED,()=>{avatar=null;$('stage').classList.remove('liveAvatar');$('avatarStop').disabled=true;$('avatarStatus').textContent='Avatar disconnected';state('Idle')});await avatar.start();$('avatarStatus').textContent='SARA avatar connect ہو رہا ہے…'}catch(e){avatar=null;$('stage').classList.remove('liveAvatar');$('avatarStatus').textContent='حقیقی avatar connect نہیں ہوا: '+e.message}}
-async function health(){try{const r=await api('/api/health');const x=await r.json();if(!r.ok)throw Error('HTTP '+r.status);voiceReady=!!x.voiceConfigured;$('voiceStatus').textContent=voiceReady?'ElevenLabs configured':'Browser fallback';$('status').textContent=x.saraPipeline?(x.liveAvatarConfigured?'Runtime + LiveAvatar ready':'Runtime online • LiveAvatar key not configured'):'Runtime online';$('dot').className='dot on';$('status').textContent=x.saraPipeline?(x.liveAvatarConfigured?'Runtime + LiveAvatar ready':'Runtime online • LiveAvatar key not configured'):'Runtime online';return x}catch(e){$('status').textContent='Backend unavailable';$('status').textContent='Backend unavailable';$('dot').className='dot bad';$('voiceStatus').textContent='Browser fallback';return null}}
-async function me(){try{const x=await(await api('/api/me')).json();if(x.authenticated){$('connect').textContent='TikTok Connected';$('connect').disabled=true;$('account').textContent=x.openId?'Connected • Open ID received':'Connected'}}catch{}}
-function startEventStream(){if(eventSource)eventSource.close();try{eventSource=new EventSource(apiBase()+'/api/sara/events');eventSource.onopen=()=>{$('liveFeed').innerHTML='<span class="ok">● LIVE event stream connected</span>'};eventSource.onmessage=e=>{try{const x=JSON.parse(e.data);if(['comment','gift','follow','like','share'].includes(x.type)){$('liveFeed').textContent='Event: '+x.type+(x.viewerId?' • '+x.viewerId:'')+(x.giftName?' • '+x.giftName:'');if(x.text)addMsg('user',x.text)}}catch{}};eventSource.onerror=()=>{$('liveFeed').innerHTML='<span class="warn">Event stream reconnecting…</span>'}}catch(e){$('liveFeed').textContent='Event stream unavailable'}} async function control(action){try{const r=await api('/api/sara/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action})});const x=await r.json();if(!r.ok)throw Error(x.error||'Control failed');$('liveFeed').textContent=action==='stop'?'SARA STOPPED':'SARA RESUMED';queueStatus()}catch(e){$('liveFeed').textContent='Control error: '+e.message}} $('stop').onclick=()=>control('stop');$('resume').onclick=()=>control('resume'); async function queueStatus(){try{const x=await(await api('/api/sara/status')).json();$('queueText').textContent=`Queue: ${x.queued||0}${x.active?' • processing':''}`}catch{$('queueText').textContent='Queue: backend offline'}}
-async function diagnose(){const d=$('diag');d.className='small diag show';d.textContent='Testing…';try{const r=await api('/api/health');const x=await r.json();d.innerHTML=`<span class="ok">✓ Backend HTTP ${r.status}</span><br>AI: ${x.aiConfigured?'ready':'not configured'}<br>Voice: ${x.voiceConfigured?'ready':'browser fallback'}<br>LiveAvatar: ${x.liveAvatarConfigured?'ready':'not configured'}<br>Live interaction API: ${x.liveInteractionApi?'enabled':'not enabled'}`}catch(e){d.innerHTML=`<span class="err">✕ Cannot reach backend.</span><br>${e.message}<br><br>SARA خود اپنے backend سے connect ہوتی ہے۔`}}
-$('diagnose').onclick=diagnose;
-$('connect').onclick=()=>location.href=apiBase()+'/auth/tiktok';
-$('creator').onclick=async()=>{try{const r=await api('/api/tiktok/creator-info',{method:'POST'});const x=await r.json();if(!r.ok){$('account').textContent=x.error||'Creator info failed';return}const d=x.data||{};$('account').innerHTML=`<span class="ok">Authorized</span><br>Privacy: ${(d.privacy_level_options||[]).join(', ')||'not returned'}<br>Max video: ${d.max_video_post_duration_sec||'?'} sec`}catch(e){$('account').textContent='Backend unavailable: '+e.message}};
-$('avatarStart').onclick=startAvatar;$('avatarStop').onclick=cleanupAvatar;
-$('send').onclick=async()=>{const text=$('input').value.trim();if(!text)return;addMsg('user',text);$('input').value='';state('Thinking');try{const r=await api('/api/sara/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:'ur'})});const x=await r.json();if(!r.ok)throw Error(x.error||'SARA pipeline failed');addMsg('sara',x.reply||'');$('caption').textContent=x.reply||'';if(avatar&&typeof avatar.repeat==='function'){try{state('Speaking');await avatar.repeat(x.reply||'')}catch(e){$('avatarStatus').textContent='Avatar speech failed: '+e.message;await speak(x.reply||'')}}else if(x.audioUrl){await playAudio(apiBase()+x.audioUrl)}else await speak(x.reply||'');state('Idle');queueStatus()}catch(e){addMsg('sara','Connection error: '+e.message);state('Idle')}};
-$('input').onkeydown=e=>{if(e.key==='Enter')$('send').click()};function initMic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('listenStatus').textContent='Browser voice recognition not supported';return}recognition=new SR();recognition.continuous=false;recognition.interimResults=true;recognition.lang='ur-PK';recognition.onstart=()=>{listening=true;$('listen').textContent='⏹ Stop Listening';$('listenStatus').textContent='Listening…'};recognition.onresult=e=>{let finalText='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)finalText+=e.results[i][0].transcript}if(finalText){$('input').value=finalText;$('listenStatus').textContent='Heard: '+finalText;$('send').click()}};recognition.onerror=e=>{$('listenStatus').textContent='Mic error: '+e.error;listening=false;$('listen').textContent='🎤 Start Listening'};recognition.onend=()=>{listening=false;$('listen').textContent='🎤 Start Listening'}}function toggleListening(){if(!recognition)initMic();if(!recognition)return;recognition.lang='ur-PK';if(listening){recognition.stop()}else{try{recognition.start()}catch{}}}$('listen').onclick=toggleListening;$('speak').onclick=()=>speak(greetings[lang]);
-$('post').onclick=async()=>{const videoUrl=$('videoUrl').value.trim(),title=$('title').value.trim();if(!videoUrl){$('postResult').textContent='Enter a public HTTPS video URL.';return}try{const r=await api('/api/tiktok/post-url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({videoUrl,title,privacyLevel:'SELF_ONLY',disableComment:false,disableDuet:false,disableStitch:false})});const x=await r.json();if(!r.ok){$('postResult').textContent=x.error||'Publish failed';return}publishId=x.publishId;$('postResult').textContent=`Publish request accepted. ID: ${publishId||'unknown'}`}catch(e){$('postResult').textContent='Backend unavailable: '+e.message}};
-$('statusBtn').onclick=async()=>{if(!publishId){$('postResult').textContent='No publish ID yet.';return}try{const r=await api('/api/tiktok/post-status',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({publishId})});const x=await r.json();$('postResult').textContent=JSON.stringify(x.data||x)}catch(e){$('postResult').textContent='Backend unavailable: '+e.message}};
-(async()=>{const h=await health();await me();await queueStatus();startEventStream();if(h?.liveAvatarConfigured)await startAvatar();setInterval(queueStatus,5000)})();
+let avatar=null,avatarSdk=null,eventSource=null,recognition=null,autoListening=false,listening=false,startingMic=false;
+
+function addMsg(who,text){
+  const d=document.createElement('div');d.className='msg '+who;d.textContent=text;
+  $('transcript').appendChild(d);$('transcript').scrollTop=$('transcript').scrollHeight;
+}
+function state(s){
+  $('saraState').textContent=s;$('pipeline').textContent=s;
+  $('stage').classList.toggle('speaking',s==='Speaking');
+  if(s==='Thinking'||s==='Speaking'){
+    if(recognition&&listening){try{recognition.stop()}catch{}}
+  }else if(s==='Idle'&&autoListening){
+    setTimeout(startRecognition,500);
+  }
+}
+function setMicStatus(t,ok=false){$('micStatus').textContent=t;$('micStatus').className='notice '+(ok?'ok':'');}
+function cleanupAvatar(){
+  const a=avatar;avatar=null;$('stage').classList.remove('liveAvatar');
+  if(a){try{a.stop()}catch{}}
+}
+async function startAvatar(){
+  if(avatar)return true;
+  try{
+    $('status').textContent='Real SARA avatar connecting…';
+    const r=await api('/api/liveavatar/token',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({isSandbox:false})});
+    const x=await r.json().catch(()=>({}));
+    if(!r.ok)throw Error(x.error||'LiveAvatar session token request failed');
+    avatarSdk=await import('https://esm.sh/@heygen/liveavatar-web-sdk@0.0.19');
+    avatar=new avatarSdk.LiveAvatarSession(x.session_token,{autoKeepAlive:true,voiceChat:{defaultMuted:true}});
+    avatar.on(avatarSdk.SessionEvent.SESSION_STREAM_READY,async()=>{
+      const v=$('avatarVideo');avatar.attach(v);await v.play().catch(()=>{});
+      $('stage').classList.add('liveAvatar');$('status').textContent='SARA LIVE';$('dot').className='dot on';state('Idle');
+    });
+    avatar.on(avatarSdk.AgentEventsEnum.AVATAR_SPEAK_STARTED,()=>state('Speaking'));
+    avatar.on(avatarSdk.AgentEventsEnum.AVATAR_SPEAK_ENDED,()=>state('Idle'));
+    avatar.on(avatarSdk.SessionEvent.SESSION_DISCONNECTED,()=>{
+      avatar=null;$('stage').classList.remove('liveAvatar');$('status').textContent='Avatar disconnected';$('dot').className='dot bad';state('Idle');
+      setTimeout(startAvatar,3000);
+    });
+    await avatar.start();
+    return true;
+  }catch(e){
+    avatar=null;$('stage').classList.remove('liveAvatar');$('status').textContent='Avatar error';$('dot').className='dot bad';
+    setMicStatus('Real LiveAvatar connect نہیں ہوا: '+e.message);
+    return false;
+  }
+}
+async function askSara(text){
+  if(!text||state==='Thinking')return;
+  addMsg('user',text);state('Thinking');
+  try{
+    const r=await api('/api/sara/message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,language:'ur'})});
+    const x=await r.json();
+    if(!r.ok)throw Error(x.error||'SARA pipeline failed');
+    addMsg('sara',x.reply||'');$('caption').textContent=x.reply||'';
+    if(avatar&&typeof avatar.repeat==='function'){
+      state('Speaking');await avatar.repeat(x.reply||'');
+    }
+    state('Idle');
+  }catch(e){
+    addMsg('sara','معذرت، ابھی جواب دینے میں مسئلہ آ رہا ہے۔');
+    $('caption').textContent='معذرت، ابھی جواب دینے میں مسئلہ آ رہا ہے۔';
+    state('Idle');setMicStatus('SARA backend error: '+e.message);
+  }
+}
+function initRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setMicStatus('اس Chrome browser میں voice recognition available نہیں ہے۔');return false}
+  recognition=new SR();
+  recognition.continuous=true;recognition.interimResults=false;recognition.lang='ur-PK';recognition.maxAlternatives=1;
+  recognition.onstart=()=>{listening=true;$('queueText').textContent='Listening…';setMicStatus('🎤 SARA مسلسل سن رہی ہے — آپ بات کریں۔',true)};
+  recognition.onresult=e=>{
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal){
+        const text=e.results[i][0].transcript.trim();
+        if(text)askSara(text);
+      }
+    }
+  };
+  recognition.onerror=e=>{
+    listening=false;
+    if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+      setMicStatus('Microphone permission allow کریں۔ اس کے بعد SARA خود سننا شروع کرے گی۔');
+      return;
+    }
+    setMicStatus('Mic دوبارہ connect ہو رہی ہے…');
+  };
+  recognition.onend=()=>{
+    listening=false;
+    if(autoListening&&$('saraState').textContent==='Idle')setTimeout(startRecognition,700);
+  };
+  return true;
+}
+async function startRecognition(){
+  if(!autoListening||!recognition||listening||startingMic)return;
+  startingMic=true;
+  try{recognition.lang='ur-PK';recognition.start()}catch{}
+  finally{startingMic=false}
+}
+async function enableAutomaticListening(){
+  autoListening=true;
+  if(!initRecognition())return;
+  try{
+    if(navigator.mediaDevices?.getUserMedia){
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      stream.getTracks().forEach(t=>t.stop());
+    }
+    await startRecognition();
+  }catch(e){
+    setMicStatus('Microphone permission چاہیے۔ Browser میں Allow کریں، پھر SARA خود سننے لگے گی۔');
+  }
+}
+async function health(){
+  try{
+    const r=await api('/api/health');const x=await r.json();
+    if(!r.ok)throw Error('HTTP '+r.status);
+    $('status').textContent=x.liveAvatarConfigured?'SARA ready':'LiveAvatar configuration missing';
+    $('dot').className='dot '+(x.liveAvatarConfigured?'on':'bad');
+    return x;
+  }catch(e){$('status').textContent='Backend unavailable';$('dot').className='dot bad';return null}
+}
+async function me(){
+  try{
+    const x=await(await api('/api/me')).json();
+    if(x.authenticated){
+      $('connect').textContent='TikTok Connected';$('connect').disabled=true;
+      $('account').textContent='TikTok account connected • official OAuth';
+    }
+  }catch{}
+}
+$('connect').onclick=()=>location.href='/auth/tiktok';
+(async()=>{
+  const h=await health();await me();
+  if(h?.liveAvatarConfigured)await startAvatar();
+  await enableAutomaticListening();
+})();
 </script>
-</body></html>
+</body>
