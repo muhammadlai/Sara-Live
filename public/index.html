@@ -36,7 +36,7 @@
 const $=id=>document.getElementById(id);
 // GitHub Pages is static. Set the public Node backend URL via ?backend=https://YOUR-BACKEND.
 const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||'';
-const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
+const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{credentials:'include',...o,headers:{Accept:'application/json',...(o.headers||{})}});
 let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;
 
 function setStatus(text,good=false){$('status').textContent=text;$('dot').classList.toggle('onDot',good)}
