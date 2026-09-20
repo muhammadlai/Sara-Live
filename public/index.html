@@ -26,7 +26,9 @@
 <div class="notice">LIVE comments/gifts are not invented here. An approved official TikTok LIVE event source can later feed the same <b>/api/sara/message</b> pipeline.</div>
 </aside></div>
 <script>
-const $=id=>document.getElementById(id);\nconst apiBase=()=>location.origin;\nconst api=(p,o={})=>fetch(p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
+const $=id=>document.getElementById(id);
+const apiBase=()=>location.origin;
+const api=(p,o={})=>fetch(p,{...o,headers:{Accept:'application/json',...(o.headers||{})}});
 let lang='ur',voiceReady=false,publishId=null,avatar=null,avatarSdk=null,eventSource=null,recognition=null,listening=false;
 const greetings={ur:'السلام علیکم جی! سارا یہاں ہے۔ صرف اردو میں بات کریں۔ 💜'};
 function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('transcript').appendChild(d);$('transcript').scrollTop=$('transcript').scrollHeight}
