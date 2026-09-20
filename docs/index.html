@@ -1,25 +1,14 @@
 <!doctype html>
-<html lang="ur">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SARA AI LIVE — Preview</title>
+<html lang="ur"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SARA AI LIVE — Preview</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#05060a;color:#fff;font-family:system-ui,Arial;min-height:100vh;display:grid;place-items:center}
-.app{width:min(1100px,100%);height:min(760px,100vh);position:relative;overflow:hidden;background:radial-gradient(circle at 50% 25%,#4b2750,#10131c 45%,#030407);border-radius:22px;border:1px solid #30364a}
-.top{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;z-index:3}.badge,.panel{background:#080b12dd;border:1px solid #30364a;border-radius:14px;padding:11px 15px;backdrop-filter:blur(12px)}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#36d77a;margin-right:7px}
-.avatar{position:absolute;inset:80px 0 105px;display:grid;place-items:center}.face{width:230px;height:310px;border-radius:48% 48% 45% 45%;background:linear-gradient(160deg,#f3c5a8,#9e5e59);box-shadow:0 25px 100px #d77b8d55;position:relative}
-.face:before,.face:after{content:"";position:absolute;top:115px;width:28px;height:12px;background:#271923;border-radius:50%}.face:before{left:55px}.face:after{right:55px}
-.hair{position:absolute;inset:-25px -18px 80px;border-radius:50% 50% 35% 35%;background:#171018;z-index:-1}
-.smile{position:absolute;left:90px;top:185px;width:50px;height:25px;border-bottom:4px solid #7a2739;border-radius:50%}
-.caption{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);width:min(850px,calc(100% - 36px));text-align:center}.panel{padding:14px 18px}
-.controls{position:absolute;bottom:18px;left:18px;right:18px;display:flex;gap:10px;justify-content:center}.btn{border:1px solid #3b4258;background:#111522;color:#fff;border-radius:12px;padding:11px 16px;cursor:pointer}.btn.primary{background:#7b2cff}
-</style></head>
-<body><main class="app">
-<div class="top"><div class="badge">SARA AI • Virtual Host</div><div class="badge"><span class="dot"></span><span id="status">SARA LIVE</span></div></div>
+*{box-sizing:border-box}body{margin:0;background:#05060a;color:#fff;font-family:system-ui,Arial;min-height:100vh;display:grid;place-items:center}.app{width:min(1100px,100%);height:min(760px,100vh);position:relative;overflow:hidden;background:radial-gradient(circle at 50% 25%,#4b2750,#10131c 45%,#030407);border-radius:22px;border:1px solid #30364a}.top{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;z-index:3}.badge,.panel{background:#080b12dd;border:1px solid #30364a;border-radius:14px;padding:11px 15px;backdrop-filter:blur(12px)}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#36d77a;margin-right:7px}.avatar{position:absolute;inset:80px 0 105px;display:grid;place-items:center}.face{width:230px;height:310px;border-radius:48% 48% 45% 45%;background:linear-gradient(160deg,#f3c5a8,#9e5e59);box-shadow:0 25px 100px #d77b8d55;position:relative}.face:before,.face:after{content:"";position:absolute;top:115px;width:28px;height:12px;background:#271923;border-radius:50%}.face:before{left:55px}.face:after{right:55px}.hair{position:absolute;inset:-25px -18px 80px;border-radius:50% 50% 35% 35%;background:#171018;z-index:-1}.smile{position:absolute;left:90px;top:185px;width:50px;height:25px;border-bottom:4px solid #7a2739;border-radius:50%}.caption{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);width:min(850px,calc(100% - 36px));text-align:center}.panel{padding:14px 18px}.controls{position:absolute;bottom:18px;left:18px;right:18px;display:flex;gap:10px;justify-content:center}.btn{border:1px solid #3b4258;background:#111522;color:#fff;border-radius:12px;padding:11px 16px;cursor:pointer}.btn.primary{background:#7b2cff}.note{position:absolute;top:70px;left:50%;transform:translateX(-50%);width:min(700px,calc(100% - 36px));text-align:center;color:#c8cbd6;font-size:13px}
+</style></head><body><main class="app">
+<div class="top"><div class="badge">SARA AI • Virtual Host</div><div class="badge"><span class="dot"></span><span id="status">PREVIEW</span></div></div>
+<div class="note">GitHub Pages preview — backend/TikTok connect abhi live backend URL ke baghair available nahi.</div>
 <section class="avatar"><div class="face"><div class="hair"></div><div class="smile"></div></div></section>
-<div class="caption"><div class="panel" id="caption">Assalam-o-Alaikum! Main SARA hoon. Ye hamara web preview hai.</div></div>
-<div class="controls"><button class="btn primary" onclick="talk()">🎤 Test SARA</button><button class="btn" onclick="document.getElementById('status').textContent='TikTok Connected'">Connect TikTok</button></div>
-</main>
-<script>function talk(){const c=document.getElementById('caption'),s=document.getElementById('status');s.textContent='SARA BOL RAHI HAI…';c.textContent='Ji bilkul! SARA ready hai. Ab hum isi version ko test karke final APK banayenge.';setTimeout(()=>s.textContent='SARA LIVE',2200)}</script>
-</body></html>
+<div class="caption"><div class="panel" id="caption">Assalam-o-Alaikum! Main SARA hoon. Pehle UI test karein, phir real backend aur APK connect karenge.</div></div>
+<div class="controls"><button class="btn primary" onclick="talk()">🎤 Test SARA</button><button class="btn" onclick="connect()">Connect TikTok</button></div>
+</main><script>
+function talk(){const c=document.getElementById('caption'),s=document.getElementById('status');s.textContent='SARA BOL RAHI HAI…';c.textContent='Ji bilkul! SARA ready hai. Ye UI preview successfully chal raha hai.';setTimeout(()=>s.textContent='PREVIEW',2200)}
+function connect(){const c=document.getElementById('caption');c.textContent='TikTok Connect ke liye real backend chahiye. GitHub Pages sirf frontend host karta hai; 404 is liye aa raha tha.'}
+</script></body></html>
