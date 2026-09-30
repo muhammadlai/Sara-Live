@@ -5,12 +5,14 @@ services:
     plan: free
     branch: main
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server-bootstrap.js
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
         value: "20"
+      - key: SARA_ALLOWED_ORIGINS
+        value: "https://muhammadlai.github.io,http://localhost:3000,http://127.0.0.1:3000"
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
