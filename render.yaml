@@ -34,9 +34,9 @@ services:
       - key: TIKTOK_CLIENT_SECRET
         sync: false
       - key: TIKTOK_REDIRECT_URI
-        sync: false
+        value: "https://sara-live.onrender.com/auth/tiktok/callback"
       - key: TIKTOK_SCOPES
-        value: user.info.basic,video.publish
+        value: user.info.basic
       - key: SARA_MAX_QUEUE
         value: "20"
       - key: SARA_AUDIO_TTL_MS
