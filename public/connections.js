@@ -1,7 +1,9 @@
 // GitHub Pages is static, so point the existing UI at the deployed Node backend by default.
-// This remains overrideable with ?backend=https://... or localStorage.sara_backend_url.
+// On GitHub Pages we intentionally ignore any stale localStorage backend value unless
+// the user explicitly supplies ?backend=https://... for development/testing.
+const isGithubPages=location.hostname==='muhammadlai.github.io'||location.hostname.endsWith('.github.io');
+if(isGithubPages)localStorage.removeItem('sara_backend_url');
 window.SARA_BACKEND_URL=window.SARA_BACKEND_URL||'https://sara-live.onrender.com';
-if(location.hostname==='muhammadlai.github.io'&&localStorage.getItem('sara_backend_url')===location.origin){localStorage.removeItem('sara_backend_url');}
 
 async function refreshConnections(){
   const r=await api('/api/connectors/status');
@@ -43,6 +45,24 @@ async function disconnectConnector(provider){
   if(!r.ok)throw Error(x.error||'Disconnect failed');
   await refreshConnections();
 }
+async function connectTikTokOAuth(){
+  if(!BACKEND_URL){throw Error('SARA backend URL is not configured.');}
+  try{
+    const r=await api('/api/health');
+    const h=await r.json();
+    if(!r.ok)throw Error(h.error||'SARA backend health check failed');
+    if(!h.tiktokOAuthConfigured){
+      const missing=[];
+      if(!h.tiktokClientKeyPresent)missing.push('TIKTOK_CLIENT_KEY');
+      if(!h.tiktokClientSecretPresent)missing.push('TIKTOK_CLIENT_SECRET');
+      throw Error('TikTok OAuth backend is not configured. Missing: '+missing.join(', ')+'. These must be set on the Render backend, not only in GitHub Actions.');
+    }
+  }catch(e){
+    if(e.name==='TypeError')throw Error('SARA backend is not reachable at '+BACKEND_URL);
+    throw e;
+  }
+  location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';
+}
 function initConnections(){
   const panel=document.getElementById('connectionPanel'), content=document.getElementById('connectionContent');
   if(!panel||!content)return;
@@ -55,7 +75,7 @@ function initConnections(){
     <div style="color:#98a2b3;font-size:12px">Expiry is displayed only when a provider supplies it. No artificial expiry is invented for credentials.</div>`;
   document.getElementById('settings').onclick=async()=>{panel.classList.add('open');try{await refreshConnections()}catch(e){alert('SARA backend is not reachable: '+e.message)}};
   document.getElementById('cpClose').onclick=()=>panel.classList.remove('open');
-  document.getElementById('cpTikTok').onclick=()=>{if(BACKEND_URL)location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';else alert('SARA backend URL is not configured.')};
+  document.getElementById('cpTikTok').onclick=()=>connectTikTokOAuth().catch(e=>alert(e.message));
   document.getElementById('cpTikTokRefresh').onclick=()=>refreshConnections().catch(e=>alert(e.message));
   document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveConnector(b.dataset.save).catch(e=>alert(e.message)));
   document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>testConnector(b.dataset.test).catch(e=>alert(e.message)));
