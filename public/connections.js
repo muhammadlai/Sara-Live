@@ -39,8 +39,15 @@ async function disconnectConnector(provider){
   await refreshConnections();
 }
 function initConnections(){
-  const panel=document.getElementById('connectionPanel');
-  if(!panel)return;
+  const panel=document.getElementById('connectionPanel'), content=document.getElementById('connectionContent');
+  if(!panel||!content)return;
+  content.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center"><div><h2 style="margin:0 0 5px">SARA Connections</h2><div style="color:#98a2b3;font-size:12px">TikTok OAuth + AI service connectors</div></div><button class="btn" id="cpClose">Close</button></div>
+    <div class="connector"><h3>TikTok</h3><div style="color:#98a2b3;font-size:12px">Official OAuth connection.</div><div class="row"><button class="btn primary" id="cpTikTok">Connect TikTok</button><button class="btn" id="cpTikTokRefresh">Refresh</button></div><div id="cpTikTokState">Checking...</div></div>
+    <div class="connector"><h3>OpenAI</h3><div style="color:#98a2b3;font-size:12px">Configure the AI model and credential.</div><div class="row"><input id="openaiKey" type="password" placeholder="Credential"><input id="openaiModel" value="gpt-5.6" placeholder="Model"></div><div class="row"><button class="btn primary" data-save="openai">Save</button><button class="btn" data-test="openai">Test</button><button class="btn" data-disconnect="openai">Disconnect</button></div><div id="openaiState">Not connected</div></div>
+    <div class="connector"><h3>ElevenLabs</h3><div style="color:#98a2b3;font-size:12px">Configure the voice service and voice ID.</div><div class="row"><input id="elevenlabsKey" type="password" placeholder="Credential"><input id="elevenlabsVoice" placeholder="Voice ID"></div><div class="row"><button class="btn primary" data-save="elevenlabs">Save</button><button class="btn" data-test="elevenlabs">Test</button><button class="btn" data-disconnect="elevenlabs">Disconnect</button></div><div id="elevenlabsState">Not connected</div></div>
+    <div class="connector"><h3>LiveAvatar</h3><div style="color:#98a2b3;font-size:12px">Configure avatar session access.</div><div class="row"><input id="liveavatarKey" type="password" placeholder="Credential"><input id="liveavatarId" placeholder="Avatar ID"></div><div class="row"><label style="color:#98a2b3;font-size:12px"><input id="liveavatarSandbox" type="checkbox"> Sandbox</label></div><div class="row"><button class="btn primary" data-save="liveavatar">Save</button><button class="btn" data-test="liveavatar">Test</button><button class="btn" data-disconnect="liveavatar">Disconnect</button></div><div id="liveavatarState">Not connected</div></div>
+    <div style="color:#98a2b3;font-size:12px">Expiry is displayed only when a provider supplies it. No artificial expiry is invented for credentials.</div>`;
   document.getElementById('settings').onclick=async()=>{panel.classList.add('open');await refreshConnections()};
   document.getElementById('cpClose').onclick=()=>panel.classList.remove('open');
   document.getElementById('cpTikTok').onclick=()=>{if(BACKEND_URL)location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok'};
