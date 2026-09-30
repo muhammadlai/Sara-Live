@@ -3,7 +3,7 @@
 // existing GitHub Pages UI talks to the existing backend on Render.
 const http=require('http');
 
-const allowed=new Set(String(process.env.SARA_ALLOWED_ORIGINS||'https://muhammadlai.github.io,http://localhost:3000,http://127.0.0.1:3000').split(',').map(x=>x.trim()).filter(Boolean));
+const allowed=new Set(String(process.env.SARA_ALLOWED_ORIGINS||'https://muhammadlai.github.io,https://sara-live-3p8n.vercel.app,http://localhost:3000,http://127.0.0.1:3000').split(',').map(x=>x.trim()).filter(Boolean));
 const originalCreateServer=http.createServer;
 
 http.createServer=function patchedCreateServer(listener){
