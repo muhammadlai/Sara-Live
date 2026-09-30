@@ -2,7 +2,9 @@
 // On GitHub Pages we intentionally ignore any stale localStorage backend value unless
 // the user explicitly supplies ?backend=https://... for development/testing.
 const isGithubPages=location.hostname==='muhammadlai.github.io'||location.hostname.endsWith('.github.io');
-if(isGithubPages)localStorage.removeItem('sara_backend_url');
+const isVercel=location.hostname.endsWith('.vercel.app')||location.hostname.endsWith('.vercel.sh');
+if(isGithubPages||isVercel)localStorage.removeItem('sara_backend_url');
+// The browser UI is static; the live Node API runs on Render.
 window.SARA_BACKEND_URL=window.SARA_BACKEND_URL||'https://sara-live.onrender.com';
 
 async function refreshConnections(){
