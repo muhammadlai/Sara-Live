@@ -1,3 +1,7 @@
+// GitHub Pages is static, so point the existing UI at the deployed Node backend by default.
+// This remains overrideable with ?backend=https://... or localStorage.sara_backend_url.
+window.SARA_BACKEND_URL=window.SARA_BACKEND_URL||'https://sara-live.onrender.com';
+
 async function refreshConnections(){
   const r=await api('/api/connectors/status');
   const x=await r.json();
@@ -6,12 +10,12 @@ async function refreshConnections(){
     const c=x[p];
     if(!el)return;
     if(!c||c.status==='not_configured'){el.textContent='Not connected';return}
-    const exp=c.expiresAt?new Date(c.expiresAt).toLocaleString():'Provider expiry not available';
+    const exp=c.expiresAt?new Date(c.expiresAt).toLocaleString():'Expiry information not provided by provider';
     el.textContent='Connected • '+exp;
   });
   const me=await (await api('/api/me')).json();
   const t=document.getElementById('cpTikTokState');
-  if(t)t.textContent=me.authenticated?'TikTok connected • Access token: '+(me.accessTokenExpiresAt?new Date(me.accessTokenExpiresAt).toLocaleString():'unknown'):'Not connected';
+  if(t)t.textContent=me.authenticated?'TikTok connected • Access token: '+(me.accessTokenExpiresAt?new Date(me.accessTokenExpiresAt).toLocaleString():'provider did not provide expiry'):'Not connected';
 }
 async function saveConnector(provider){
   const apiKey=document.getElementById(provider+'Key').value.trim();
@@ -48,10 +52,10 @@ function initConnections(){
     <div class="connector"><h3>ElevenLabs</h3><div style="color:#98a2b3;font-size:12px">Configure the voice service and voice ID.</div><div class="row"><input id="elevenlabsKey" type="password" placeholder="Credential"><input id="elevenlabsVoice" placeholder="Voice ID"></div><div class="row"><button class="btn primary" data-save="elevenlabs">Save</button><button class="btn" data-test="elevenlabs">Test</button><button class="btn" data-disconnect="elevenlabs">Disconnect</button></div><div id="elevenlabsState">Not connected</div></div>
     <div class="connector"><h3>LiveAvatar</h3><div style="color:#98a2b3;font-size:12px">Configure avatar session access.</div><div class="row"><input id="liveavatarKey" type="password" placeholder="Credential"><input id="liveavatarId" placeholder="Avatar ID"></div><div class="row"><label style="color:#98a2b3;font-size:12px"><input id="liveavatarSandbox" type="checkbox"> Sandbox</label></div><div class="row"><button class="btn primary" data-save="liveavatar">Save</button><button class="btn" data-test="liveavatar">Test</button><button class="btn" data-disconnect="liveavatar">Disconnect</button></div><div id="liveavatarState">Not connected</div></div>
     <div style="color:#98a2b3;font-size:12px">Expiry is displayed only when a provider supplies it. No artificial expiry is invented for credentials.</div>`;
-  document.getElementById('settings').onclick=async()=>{panel.classList.add('open');await refreshConnections()};
+  document.getElementById('settings').onclick=async()=>{panel.classList.add('open');try{await refreshConnections()}catch(e){alert('SARA backend is not reachable: '+e.message)}};
   document.getElementById('cpClose').onclick=()=>panel.classList.remove('open');
-  document.getElementById('cpTikTok').onclick=()=>{if(BACKEND_URL)location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok'};
-  document.getElementById('cpTikTokRefresh').onclick=refreshConnections;
+  document.getElementById('cpTikTok').onclick=()=>{if(BACKEND_URL)location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';else alert('SARA backend URL is not configured.')};
+  document.getElementById('cpTikTokRefresh').onclick=()=>refreshConnections().catch(e=>alert(e.message));
   document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveConnector(b.dataset.save).catch(e=>alert(e.message)));
   document.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>testConnector(b.dataset.test).catch(e=>alert(e.message)));
   document.querySelectorAll('[data-disconnect]').forEach(b=>b.onclick=()=>disconnectConnector(b.dataset.disconnect).catch(e=>alert(e.message)));
