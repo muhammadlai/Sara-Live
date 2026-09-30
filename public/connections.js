@@ -1,6 +1,7 @@
 // GitHub Pages is static, so point the existing UI at the deployed Node backend by default.
 // This remains overrideable with ?backend=https://... or localStorage.sara_backend_url.
 window.SARA_BACKEND_URL=window.SARA_BACKEND_URL||'https://sara-live.onrender.com';
+if(location.hostname==='muhammadlai.github.io'&&localStorage.getItem('sara_backend_url')===location.origin){localStorage.removeItem('sara_backend_url');}
 
 async function refreshConnections(){
   const r=await api('/api/connectors/status');
