@@ -24,3 +24,10 @@ Never commit `.env` or expose `TIKTOK_CLIENT_SECRET` to the browser.
 SARA now includes an optional `tiktok-live-connector` bridge for realtime LIVE comments, gifts, likes, joins and shares. It connects server-side to TikTok's Webcast stream using the broadcaster username. The connector is unofficial/reverse-engineered, so TikTok can change the protocol; it is not the same as TikTok's public official API. See the upstream project for its current support and limitations: https://github.com/zerodytrash/TikTok-Live-Connector
 
 Set `TIKTOK_LIVE_USERNAME` or use the **Connect LIVE** button in the UI. Set `SARA_AUTO_REPLY_LIVE=true` only if you want comments forwarded into SARA's AI pipeline automatically. Automatic public chat replies require the connector's authenticated send-message setup and should be enabled separately.
+
+## Current deployment links
+- Frontend (GitHub Pages): https://muhammadlai.github.io/Sara-Live/
+- Backend/API (Render): https://sara-live.onrender.com
+- GitHub repository: https://github.com/muhammadlai/Sara-Live
+
+The Vercel deployment is not the SARA backend. If a Vercel preview is used for the static UI, it is configured to call the Render API.
