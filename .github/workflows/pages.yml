@@ -31,6 +31,7 @@ jobs:
         run: |
           mkdir -p _site
           cp public/index.html _site/index.html
+          cp public/connections.js _site/connections.js
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
