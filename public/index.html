@@ -35,8 +35,9 @@
 </div>
 <script>
 const $=id=>document.getElementById(id);
-// GitHub Pages is static. Set the public Node backend URL via ?backend=https://YOUR-BACKEND.
-const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||'';
+// The app is served by the same Node backend in production. A backend override is kept only for development/GitHub Pages.
+const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||window.SARA_BACKEND_URL||((location.hostname==='github.io'||location.protocol==='file:')?'':location.origin);
+if(BACKEND_URL)localStorage.setItem('sara_backend_url',BACKEND_URL.replace(/\/$/,''));
 const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{credentials:'include',...o,headers:{Accept:'application/json',...(o.headers||{})}});
 let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;let liveStream=null;
 
@@ -134,7 +135,7 @@ function handleLiveEvent(e){
     showCaption(e.reply);
     if(avatar){
       setStatus('SARA بول رہی ہے…',true);
-      if(e.voice&&typeof avatar.repeatAudio==='function')avatar.repeatAudio(e.voice);
+      if(typeof e.voiceBase64==='string'&&e.voiceBase64&&typeof avatar.repeatAudio==='function')avatar.repeatAudio(e.voiceBase64);
       else if(typeof avatar.repeat==='function')avatar.repeat(e.reply);
     }
   }
@@ -148,9 +149,10 @@ function connectLiveEvents(){
     liveStream.onerror=()=>{if(liveStream){liveStream.close();liveStream=null;setTimeout(connectLiveEvents,2500)}};
   }catch{}
 }
-async function connectLive(){
-  if(!BACKEND_URL){showCaption('Backend URL required: ?backend=https://YOUR-BACKEND');return}
-  const username=prompt('TikTok LIVE username (@name):',localStorage.getItem('sara_tiktok_live_username')||'');
+async function connectLive(auto=false){
+  if(!BACKEND_URL){showCaption('SARA server URL is not configured.');return}
+  let username=localStorage.getItem('sara_tiktok_live_username')||'';
+  if(!username&&!auto)username=prompt('TikTok LIVE username (@name):','');
   if(!username)return;
   localStorage.setItem('sara_tiktok_live_username',username);
   const r=await api('/api/tiktok/live/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username})});
@@ -162,18 +164,34 @@ async function connectLive(){
   connectLiveEvents();
 }
 async function checkTikTok(){
-  try{const x=await(await api('/api/me')).json();if(x.authenticated){$('connect').textContent='TikTok Connected';$('connect').disabled=true}}catch{}
+  try{
+    const x=await(await api('/api/me')).json();
+    if(x.authenticated){
+      $('connect').textContent='TikTok Connected';
+      $('connect').disabled=true;
+      try{
+        const p=await(await api('/api/tiktok/profile')).json();
+        if(p.profile?.display_name) $('connect').textContent='TikTok: '+p.profile.display_name;
+      }catch{}
+    }
+  }catch{}
 }
 $('liveConnect').onclick=()=>connectLive().catch(e=>{showCaption('TikTok LIVE connect error: '+e.message);mic('LIVE connection failed')});
 $('connect').onclick=()=>{
-  if(!BACKEND_URL){showCaption('Backend URL required: ?backend=https://YOUR-BACKEND');return;}
+  if(!BACKEND_URL){showCaption('SARA server URL is not configured.');return;}
   localStorage.setItem('sara_backend_url',BACKEND_URL);
   location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';
 };
 (async()=>{
-  const h=await checkHealth();await checkTikTok();connectLiveEvents();
+  const h=await checkHealth();
+  await checkTikTok();
+  connectLiveEvents();
   if(h?.liveAvatarConfigured)await startAvatar();
   await enableMic();
+  // Reconnect the saved LIVE target automatically after the APK/server reconnects.
+  if(localStorage.getItem('sara_tiktok_live_username')) {
+    setTimeout(()=>connectLive(true).catch(()=>{}),1200);
+  }
 })();
 </script>
 </body>
