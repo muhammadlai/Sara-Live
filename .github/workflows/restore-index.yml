@@ -6,7 +6,7 @@ permissions:
   contents: write
 jobs:
   restore:
-    if: github.event.head_commit.id == '19fa56377e8f16c3434cdbbd848e919a6f22db50'
+    if: github.event.before == '19fa56377e8f16c3434cdbbd848e919a6f22db50'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
