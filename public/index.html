@@ -28,6 +28,7 @@
     <div class="badge"><span id="dot"></span><span id="status">Connecting…</span></div>
   </div>
   <button id="connect">Connect TikTok</button>
+  <button id="liveConnect" style="position:absolute;right:18px;top:116px;z-index:6;border:1px solid #30364a;background:#0b0e16e8;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer">Connect LIVE</button>
   <video id="avatar" autoplay playsinline></video>
   <div id="caption"></div>
   <div class="bottom"><div id="mic">SARA خود سننے کے لیے تیار ہو رہی ہے…</div></div>
@@ -37,7 +38,7 @@ const $=id=>document.getElementById(id);
 // GitHub Pages is static. Set the public Node backend URL via ?backend=https://YOUR-BACKEND.
 const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||'';
 const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{credentials:'include',...o,headers:{Accept:'application/json',...(o.headers||{})}});
-let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;
+let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;let liveStream=null;
 
 function setStatus(text,good=false){$('status').textContent=text;$('dot').classList.toggle('onDot',good)}
 function mic(text){$('mic').textContent=text}
@@ -122,16 +123,55 @@ async function checkHealth(){
     return x
   }catch{mic('SARA backend available نہیں ہے۔')}
 }
+function handleLiveEvent(e){
+  if(!e||e.type==='connected')return;
+  if(e.type==='comment'){showCaption('💬 '+(e.text||''));mic('💬 LIVE comment: '+(e.text||''));}
+  if(e.type==='gift'){showCaption('🎁 '+(e.viewerId||'Viewer')+' نے '+(e.giftName||'Gift')+' x'+(e.giftCount||1)+' بھیجا');}
+  if(e.type==='like')mic('❤️ LIVE like received');
+  if(e.type==='follow')mic('➕ LIVE viewer joined');
+  if(e.type==='share')mic('↗️ LIVE share received');
+  if(e.type==='sara'&&e.reply){
+    showCaption(e.reply);
+    if(avatar){
+      setStatus('SARA بول رہی ہے…',true);
+      if(e.voice&&typeof avatar.repeatAudio==='function')avatar.repeatAudio(e.voice);
+      else if(typeof avatar.repeat==='function')avatar.repeat(e.reply);
+    }
+  }
+  if(e.type==='system')mic(e.text||'TikTok LIVE event');
+}
+function connectLiveEvents(){
+  if(liveStream)return;
+  try{
+    liveStream=new EventSource((BACKEND_URL||'')+'/api/sara/events');
+    liveStream.onmessage=e=>{try{handleLiveEvent(JSON.parse(e.data))}catch{}};
+    liveStream.onerror=()=>{if(liveStream){liveStream.close();liveStream=null;setTimeout(connectLiveEvents,2500)}};
+  }catch{}
+}
+async function connectLive(){
+  if(!BACKEND_URL){showCaption('Backend URL required: ?backend=https://YOUR-BACKEND');return}
+  const username=prompt('TikTok LIVE username (@name):',localStorage.getItem('sara_tiktok_live_username')||'');
+  if(!username)return;
+  localStorage.setItem('sara_tiktok_live_username',username);
+  const r=await api('/api/tiktok/live/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username})});
+  const x=await r.json();
+  if(!r.ok)throw Error(x.error||'LIVE connection failed');
+  $('liveConnect').textContent='LIVE Connected';
+  setStatus('TikTok LIVE connected',true);
+  mic('🎁 Gifts + 💬 comments + ❤️ likes SARA ko mil rahe hain.');
+  connectLiveEvents();
+}
 async function checkTikTok(){
   try{const x=await(await api('/api/me')).json();if(x.authenticated){$('connect').textContent='TikTok Connected';$('connect').disabled=true}}catch{}
 }
+$('liveConnect').onclick=()=>connectLive().catch(e=>{showCaption('TikTok LIVE connect error: '+e.message);mic('LIVE connection failed')});
 $('connect').onclick=()=>{
   if(!BACKEND_URL){showCaption('Backend URL required: ?backend=https://YOUR-BACKEND');return;}
   localStorage.setItem('sara_backend_url',BACKEND_URL);
   location.href=BACKEND_URL.replace(/\/$/,'')+'/auth/tiktok';
 };
 (async()=>{
-  const h=await checkHealth();await checkTikTok();
+  const h=await checkHealth();await checkTikTok();connectLiveEvents();
   if(h?.liveAvatarConfigured)await startAvatar();
   await enableMic();
 })();
