@@ -1,0 +1,25 @@
+name: Restore SARA index after accidental partial update
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  restore:
+    if: github.event.head_commit.id == '19fa56377e8f16c3434cdbbd848e919a6f22db50'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Revert accidental index replacement
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git revert --no-edit 19fa56377e8f16c3434cdbbd848e919a6f22db50
+          git push origin HEAD:main
+      - name: Remove temporary workflow
+        run: |
+          git rm .github/workflows/restore-index.yml
+          git commit -m "chore: remove temporary restore workflow"
+          git push origin HEAD:main
