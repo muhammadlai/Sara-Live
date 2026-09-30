@@ -4,34 +4,66 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SARA AI LIVE — Virtual Host</title>
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05060a;color:#fff;font-family:Inter,system-ui,sans-serif}
-#app{position:relative;width:100vw;height:100vh;background:radial-gradient(circle at 50% 20%,#32203b 0,#0b0d14 42%,#030407 100%)}
-#avatar{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#05060a;display:none}
-#avatar.on{display:block}
-.top{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
-.badge{background:#0b0e16dd;border:1px solid #2b3040;border-radius:999px;padding:10px 14px;backdrop-filter:blur(12px);font-size:13px}
-#dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d6d;margin-right:7px}.onDot{background:#36d77a!important}
-.bottom{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:center;z-index:5;pointer-events:none}
-#mic{max-width:720px;width:100%;text-align:center;background:#080b12e8;border:1px solid #2b3040;border-radius:16px;padding:12px 16px;backdrop-filter:blur(14px);font-size:14px}
-#caption{position:absolute;left:50%;transform:translateX(-50%);bottom:92px;width:min(900px,calc(100% - 36px));text-align:center;background:#080b12d9;border:1px solid #2b3040;border-radius:16px;padding:14px 18px;line-height:1.6;z-index:5;display:none}
-#caption.show{display:block}
-#connect{position:absolute;right:18px;top:66px;z-index:6;border:1px solid #30364a;background:#0b0e16e8;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-#connect:disabled{opacity:.7;cursor:default}
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#06070b;color:#f4f6fb;font-family:Inter,system-ui,-apple-system,sans-serif}
+body{letter-spacing:.01em}button,input{font:inherit}
+#app{position:relative;width:100vw;height:100vh;overflow:hidden;background:radial-gradient(circle at 48% 42%,#241a2c 0,#0b0d14 34%,#05060a 72%,#030407 100%)}
+#app:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,6,10,.94) 0,rgba(4,6,10,.5) 19%,transparent 35%,transparent 70%,rgba(4,6,10,.7) 100%);pointer-events:none}
+.top{position:absolute;top:0;left:0;right:0;height:68px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;z-index:10;border-bottom:1px solid #202532;background:#07090ee8;backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;gap:12px}.brandMark{width:38px;height:38px;border-radius:12px;border:1px solid #3b4051;background:linear-gradient(145deg,#292033,#111521);display:grid;place-items:center;font-weight:800}.brandText b{display:block;font-size:15px}.brandText span{display:block;color:#8f98aa;font-size:11px;margin-top:2px}
+.topRight{display:flex;align-items:center;gap:10px}.badge{background:#0c1018;border:1px solid #292f3d;border-radius:999px;padding:9px 13px;font-size:12px;color:#dce1ea}.statusBadge{display:flex;align-items:center}.statusBadge #dot{width:7px;height:7px;border-radius:50%;background:#ff5b72;margin-right:7px}.statusBadge #dot.onDot{background:#45dd8a!important}
+.sidebar{position:absolute;left:0;top:68px;bottom:0;width:230px;padding:18px 14px;z-index:8;border-right:1px solid #1f2430;background:#07090ee8;backdrop-filter:blur(18px)}
+.navTitle{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:#687286;margin:4px 10px 10px}.navItem{width:100%;border:1px solid transparent;background:transparent;color:#cbd2df;text-align:left;border-radius:11px;padding:11px 12px;margin-bottom:5px;cursor:pointer}.navItem.active,.navItem:hover{background:#111620;border-color:#282f3d;color:#fff}.navIcon{display:inline-block;width:22px;color:#9ba5b7}
+.sideCard{position:absolute;left:14px;right:14px;bottom:18px;border:1px solid #252b38;background:#0d1119;border-radius:15px;padding:13px}.sideCard .label{font-size:10px;color:#687286;text-transform:uppercase;letter-spacing:.1em}.sideCard .value{font-size:13px;margin-top:6px}.pill{display:inline-flex;align-items:center;gap:5px;margin-top:8px;border:1px solid #28303d;border-radius:999px;padding:5px 8px;font-size:10px;color:#aab3c2}
+.main{position:absolute;left:230px;right:0;top:68px;bottom:0;display:grid;grid-template-columns:minmax(420px,1fr) 310px;gap:14px;padding:14px}
+.center{position:relative;min-width:0;min-height:0;border:1px solid #242a37;border-radius:18px;background:linear-gradient(180deg,#0b0e15cc,#07090ecc);overflow:hidden;box-shadow:0 18px 70px #0005}
+.centerHead{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:center;z-index:6}.sectionTitle{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#8993a5}.livePill{font-size:10px;padding:6px 9px;border-radius:999px;border:1px solid #333a48;background:#0c1119;color:#aab4c4}
+#avatar{position:absolute;inset:48px 8px 94px;width:calc(100% - 16px);height:calc(100% - 142px);object-fit:contain;background:transparent;display:none;filter:drop-shadow(0 24px 50px #0008)}#avatar.on{display:block}
+.avatarFallback{position:absolute;inset:48px 8px 94px;display:flex;align-items:center;justify-content:center;pointer-events:none}.avatarOrb{width:min(300px,45vw);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#34253d 0,#171523 46%,transparent 70%);filter:blur(1px);opacity:.8}.fallbackText{position:absolute;top:53%;font-size:11px;color:#697487;letter-spacing:.08em}
+.centerFooter{position:absolute;left:14px;right:14px;bottom:14px;display:grid;grid-template-columns:1fr auto;gap:10px;z-index:6}.voiceBar{border:1px solid #252c39;background:#0b0f17e8;border-radius:13px;padding:11px 13px;color:#aeb7c6;font-size:12px}.controlRow{display:flex;gap:7px}.ctrl{border:1px solid #2b3240;background:#111620;color:#e8ecf3;border-radius:11px;padding:10px 12px;cursor:pointer}.ctrl.primary{background:#f1f3f7;color:#07080c;border-color:#f1f3f7}
+.right{min-width:0;display:flex;flex-direction:column;gap:12px;overflow:auto}.panel{border:1px solid #242a37;border-radius:16px;background:#0b0f16e8;padding:14px}.panelHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.panelHead b{font-size:12px}.panelHead span{font-size:10px;color:#687286}.metric{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1c222d;font-size:11px}.metric:last-child{border-bottom:0}.metric span{color:#7e899b}.metric strong{font-weight:600;color:#e9edf4}
+.action{width:100%;padding:11px;border-radius:10px;border:1px solid #303746;background:#121720;color:#f2f4f8;margin-top:7px;cursor:pointer;font-size:11px}.action.primary{background:#eef1f5;color:#08090d;border-color:#eef1f5}
+.log{max-height:180px;overflow:auto}.logLine{font-size:10px;color:#8791a3;padding:7px 0;border-bottom:1px solid #1b202a}.logLine b{color:#d8dde6;font-weight:500}
+#connect,#liveConnect,#settings{display:none}
+#caption{position:absolute;left:50%;transform:translateX(-50%);bottom:108px;width:min(720px,calc(100% - 40px));text-align:center;background:#090d15ed;border:1px solid #2b3240;border-radius:12px;padding:11px 16px;line-height:1.55;z-index:9;display:none;font-size:12px;box-shadow:0 15px 40px #0006}#caption.show{display:block}
+#connectionPanel{position:fixed;inset:0;background:#020409d9;backdrop-filter:blur(16px);z-index:30;display:none;align-items:center;justify-content:center;padding:18px}#connectionPanel.open{display:flex}.cp{width:min(760px,100%);max-height:92vh;overflow:auto;background:#0b0e16;border:1px solid #30364a;border-radius:22px;padding:22px}.connector{border:1px solid #282f40;border-radius:16px;padding:15px;margin:12px 0;background:#0e121b}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row input{flex:1;min-width:180px;background:#070a10;color:#fff;border:1px solid #30364a;border-radius:10px;padding:10px}.btn{border:1px solid #3b455d;background:#151b28;color:#fff;border-radius:10px;padding:10px 13px;cursor:pointer}.btn.primary{background:#fff;color:#05060a}
 .hidden{display:none!important}
-#settings{position:absolute;right:18px;top:166px;z-index:6;border:1px solid #30364a;background:#0b0e16e8;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}#connectionPanel{position:fixed;inset:0;background:#020409cc;backdrop-filter:blur(14px);z-index:30;display:none;align-items:center;justify-content:center;padding:18px}#connectionPanel.open{display:flex}.cp{width:min(760px,100%);max-height:92vh;overflow:auto;background:#0b0e16;border:1px solid #30364a;border-radius:22px;padding:22px}.connector{border:1px solid #282f40;border-radius:16px;padding:15px;margin:12px 0}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row input{flex:1;min-width:180px;background:#070a10;color:#fff;border:1px solid #30364a;border-radius:10px;padding:10px}.btn{border:1px solid #3b455d;background:#151b28;color:#fff;border-radius:10px;padding:10px 13px;cursor:pointer}</style>
+@media(max-width:900px){.sidebar{width:76px}.sidebar .navText,.sideCard{display:none}.main{left:76px;grid-template-columns:1fr}.right{display:none}.brandText{display:none}}
+@media(max-width:620px){.top{padding:0 12px}.badge{padding:8px 10px}.topRight .badge:first-child{display:none}.main{left:0;padding:8px}.sidebar{display:none}.center{border-radius:14px}.centerFooter{grid-template-columns:1fr}.controlRow{display:grid;grid-template-columns:1fr 1fr}.avatarFallback{inset:45px 0 130px}}
+</style>
 </head>
 <body>
 <div id="app">
-  <div class="top">
-    <div class="badge">SARA AI • Virtual Host</div>
-    <div class="badge"><span id="dot"></span><span id="status">Connecting…</span></div>
-  </div>
-  <button id="connect">Connect TikTok</button>
-  <button id="liveConnect" style="position:absolute;right:18px;top:116px;z-index:6;border:1px solid #30364a;background:#0b0e16e8;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer">Connect LIVE</button>
-  <video id="avatar" autoplay playsinline></video><button id="settings">Connections</button><div id="connectionPanel"><div class="cp" id="connectionContent"></div></div>
-  <div id="caption"></div>
-  <div class="bottom"><div id="mic">SARA خود سننے کے لیے تیار ہو رہی ہے…</div></div>
+  <header class="top">
+    <div class="brand"><div class="brandMark">S</div><div class="brandText"><b>SARA AI</b><span>Virtual Host • Command Center</span></div></div>
+    <div class="topRight"><div class="badge">AI Virtual Host</div><div class="badge statusBadge"><span id="dot"></span><span id="status">Connecting…</span></div></div>
+  </header>
+  <aside class="sidebar">
+    <div class="navTitle">Workspace</div>
+    <button class="navItem active" id="navOverview"><span class="navIcon">◉</span><span class="navText">Overview</span></button>
+    <button class="navItem" id="navLive"><span class="navIcon">◈</span><span class="navText">TikTok LIVE</span></button>
+    <button class="navItem" id="navBrain"><span class="navIcon">✦</span><span class="navText">AI Brain</span></button>
+    <button class="navItem" id="navActivity"><span class="navIcon">≡</span><span class="navText">Activity Log</span></button>
+    <div class="navTitle" style="margin-top:18px">System</div>
+    <button class="navItem" id="navConnections"><span class="navIcon">⚙</span><span class="navText">Connections</span></button>
+    <div class="sideCard"><div class="label">SARA status</div><div class="value" id="sideStatus">Initializing</div><div class="pill">● AI disclosure enabled</div></div>
+  </aside>
+  <main class="main">
+    <section class="center">
+      <div class="centerHead"><span class="sectionTitle">SARA Avatar</span><span class="livePill" id="avatarState">IDLE • READY</span></div>
+      <div class="avatarFallback" id="avatarFallback"><div class="avatarOrb"></div><div class="fallbackText">REALISTIC AVATAR STREAM</div></div>
+      <video id="avatar" autoplay playsinline></video>
+      <div id="caption"></div>
+      <div class="centerFooter"><div class="voiceBar" id="mic">SARA خود سننے کے لیے تیار ہو رہی ہے…</div><div class="controlRow"><button class="ctrl primary" id="startAvatarBtn">Start Avatar</button><button class="ctrl" id="listenBtn">Start Listening</button></div></div>
+    </section>
+    <aside class="right">
+      <div class="panel"><div class="panelHead"><b>LIVE CONTROL</b><span id="liveState">Offline</span></div><div class="metric"><span>TikTok</span><strong id="tiktokState">Not connected</strong></div><div class="metric"><span>Stream</span><strong id="streamState">Offline</strong></div><button class="action primary" id="tiktokBtn">Connect TikTok</button><button class="action" id="liveBtn">Connect LIVE</button></div>
+      <div class="panel"><div class="panelHead"><b>AI BRAIN</b><span>Runtime</span></div><div class="metric"><span>Language</span><strong>Urdu • Roman Urdu</strong></div><div class="metric"><span>Voice</span><strong id="voiceState">Connector required</strong></div><div class="metric"><span>Avatar</span><strong id="brainAvatar">Connector required</strong></div></div>
+      <div class="panel"><div class="panelHead"><b>ACTIVITY</b><span>Live feed</span></div><div class="log" id="activityLog"><div class="logLine"><b>System</b> • SARA command center initialized</div><div class="logLine"><b>Security</b> • AI disclosure enabled</div><div class="logLine"><b>Voice</b> • Waiting for connector</div></div></div>
+      <div class="panel"><div class="panelHead"><b>QUICK SETTINGS</b><span>Control</span></div><button class="action" id="connectionsBtn">Open Connections</button></div>
+    </aside>
+  </main>
+  <button id="connect">Connect TikTok</button><button id="liveConnect">Connect LIVE</button><button id="settings">Connections</button>
+  <div id="connectionPanel"><div class="cp" id="connectionContent"></div></div>
 </div>
 <script src="/connections.js"></script><script>
 const $=id=>document.getElementById(id);
@@ -201,6 +233,16 @@ initConnections();
     },30000);
   }
 })();
+</script>
+<script>
+const startAvatarBtn=document.getElementById('startAvatarBtn'),listenBtn=document.getElementById('listenBtn');
+if(startAvatarBtn)startAvatarBtn.onclick=()=>startAvatar().then(()=>{document.getElementById('avatarFallback').style.display='none';startAvatarBtn.textContent='Avatar Active';startAvatarBtn.disabled=true}).catch(()=>{});
+if(listenBtn)listenBtn.onclick=()=>{enableMic();listenBtn.textContent='Listening…';listenBtn.disabled=true};
+document.getElementById('tiktokBtn').onclick=()=>document.getElementById('connect').click();
+document.getElementById('liveBtn').onclick=()=>document.getElementById('liveConnect').click();
+document.getElementById('connectionsBtn').onclick=()=>document.getElementById('settings').click();
+document.getElementById('navConnections').onclick=()=>document.getElementById('settings').click();
+document.getElementById('navLive').onclick=()=>document.getElementById('liveConnect').click();
 </script>
 </body>
 </html>
