@@ -36,7 +36,7 @@ services:
       - key: TIKTOK_REDIRECT_URI
         value: "https://sara-live.onrender.com/auth/tiktok/callback"
       - key: TIKTOK_SCOPES
-        value: user.info.basic
+        value: "user.info.basic,video.publish"
       - key: SARA_MAX_QUEUE
         value: "20"
       - key: SARA_AUDIO_TTL_MS
