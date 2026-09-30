@@ -35,3 +35,11 @@ services:
         value: "600000"
       - key: SARA_MESSAGE_COOLDOWN_MS
         value: "1200"
+      - key: TIKTOK_LIVE_USERNAME
+        sync: false
+      - key: TIKTOK_LIVE_SIGN_API_KEY
+        sync: false
+      - key: SARA_AUTO_REPLY_LIVE
+        value: "true"
+      - key: SARA_EVENT_INGEST_KEY
+        sync: false
