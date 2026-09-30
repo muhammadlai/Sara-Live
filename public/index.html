@@ -190,7 +190,14 @@ $('connect').onclick=()=>{
   await enableMic();
   // Reconnect the saved LIVE target automatically after the APK/server reconnects.
   if(localStorage.getItem('sara_tiktok_live_username')) {
-    setTimeout(()=>connectLive(true).catch(()=>{}),1200);
+    const autoLive=()=>connectLive(true).catch(()=>{});
+    setTimeout(autoLive,1200);
+    setInterval(async()=>{
+      try{
+        const s=await (await api('/api/tiktok/live/status')).json();
+        if(!s.connected&&!s.connecting) autoLive();
+      }catch{}
+    },30000);
   }
 })();
 </script>
