@@ -68,7 +68,8 @@ body{letter-spacing:.01em}button,input{font:inherit}
 <script src="/connections.js"></script><script>
 const $=id=>document.getElementById(id);
 // The app is served by the same Node backend in production. A backend override is kept only for development/GitHub Pages.
-const BACKEND_URL=new URLSearchParams(location.search).get('backend')||localStorage.getItem('sara_backend_url')||window.SARA_BACKEND_URL||((location.hostname==='github.io'||location.protocol==='file:')?'':location.origin);
+const isStaticHosted=location.hostname==='muhammadlai.github.io'||location.hostname.endsWith('.github.io')||location.hostname.endsWith('.vercel.app')||location.hostname.endsWith('.vercel.sh');
+const BACKEND_URL=new URLSearchParams(location.search).get('backend')||(isStaticHosted?(window.SARA_BACKEND_URL||'https://sara-live.onrender.com'):(localStorage.getItem('sara_backend_url')||window.SARA_BACKEND_URL||location.origin));
 if(BACKEND_URL)localStorage.setItem('sara_backend_url',BACKEND_URL.replace(/\/$/,''));
 const api=(p,o={})=>fetch((BACKEND_URL||'')+p,{credentials:'include',...o,headers:{Accept:'application/json',...(o.headers||{})}});
 let avatar=null,SDK=null,recognition=null,listening=false,autoListening=false,starting=false,busy=false;let liveStream=null;
