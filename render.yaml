@@ -12,7 +12,7 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: SARA_ALLOWED_ORIGINS
-        value: "https://muhammadlai.github.io,http://localhost:3000,http://127.0.0.1:3000"
+        value: "https://muhammadlai.github.io,https://sara-live-3p8n.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
